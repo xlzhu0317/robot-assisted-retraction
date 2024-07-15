@@ -13,4 +13,7 @@ Iterative enhanced variable admittance control and null-space optimization
 * ILC-Null.m
   This is the main code, which includes iterative enhanced variable admittance control and null-space optimization. It uses real-time from ATI sensors and velocity loop.
 * Admittance.m
-  This is the traditional admittance control, and uses the bulit-in joint torque sensor of the KUKA.  
+  This is the traditional admittance control, and uses the bulit-in joint torque sensor of the KUKA.
+
+
+  # The detailed source code will be released soon!
