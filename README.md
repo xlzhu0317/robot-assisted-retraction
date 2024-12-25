@@ -10,10 +10,9 @@ Iterative enhanced variable admittance control and null-space optimization
 # Structure of the code
 * ATISensor.m
   This is matlab function, and used to read force/torque data from ATI sensors. It is worth noting that the Python package is used here, and you need to install NetFT using `pip install NetFT` in your Python environment.
-* ILC-Null.m
+* Iterativee enhanced control and Null space.m
   This is the main code, which includes iterative enhanced variable admittance control and null-space optimization. It uses real-time from ATI sensors and velocity loop.
-* Admittance.m
+* Interaction_model.m
   This is the traditional admittance control, and uses the bulit-in joint torque sensor of the KUKA.
 
 
-  # The detailed source code will be released soon!
