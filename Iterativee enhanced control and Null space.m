@@ -1,4 +1,3 @@
-% 使用ATI传感器，速度环,加入迭代控制和零空间优化
 close all;
 clear;
 clc;
@@ -10,7 +9,6 @@ ip = '172.31.1.147';
 arg1 = KST.LBR14R820;
 arg2 = KST.Medien_Flansch_elektrisch;
 Tef_flange = eye(4);
-%Tef_flange(3,4) = 30/1000;                                          % 修改第3行第4列的值
 iiwa = KST(ip, arg1, arg2, Tef_flange); 
 
 flag = iiwa.net_establishConnection();
@@ -25,35 +23,35 @@ pause(1);
 try
     targetForce = [0; 0; 20];
 
-    runTime = 2*60;                                                      % 运行时间，单位s，即90分钟
-    Delta_T = 0.001;                                                      % 时间计数判断
+    runTime = 30*60;                                                      
+    Delta_T = 0.001;                                                      
     K_H = [1; 1; 1];
-    Q = diag([0.5, 0.5, 0.5]);                                                          % 损失函数权重
+    Q = diag([0.5, 0.5, 0.5]);                                                          
     P = diag([0.15, 0.15, 0.15]); 
     K_w = diag([0.05, 0.5, 0.05, 1.2, 0.1, 1, 0.1]);
     t=0;
     
 
     % Control Loop
-    ALL_EEFForce = [];                                                    % 记录测量的末端力
-    ALL_EEFadmitCartVel = [];                                             % 记录导纳控制计算的末端速度
-    ALL_TimeInt = [];                                                     % 记录运行时间
-    ALL_Joint = [];                                                       % 记录角度
+    ALL_EEFForce = [];                                                    
+    ALL_EEFadmitCartVel = [];                                             
+    ALL_TimeInt = [];                                                     
+    ALL_Joint = [];                                                       
     ALL_B = [];
     ALL_JointVel = [];
     ALL_LossF = [];
     ALL_ObjW = [];
 
     % Initialize force control variables
-    VelErrorLast = [0; 0; 0];                                             % 初始的速度偏差
+    VelErrorLast = [0; 0; 0];                                             
 
     % Initialize addmittance parameter
-    B_cartesianLast = diag([200, 200, 300]);                                     % 阻尼系数
-    M_cartesian = diag([1.25, 1.25, 1.25]);                                  % 质量系数的逆
+    B_cartesianLast = diag([200, 200, 300]);                                     
+    M_cartesian = diag([1.25, 1.25, 1.25]);                                  
 
     EEFTarget = [0; 0; 0];
 
-    RotaM = iiwa.getEEFOrientationR();                                    % 读取末端的旋转矩阵
+    RotaM = iiwa.getEEFOrientationR();                                    
 
     init_eef_force = ATISensor();
     Delta_F_Last = init_eef_force - targetForce;
@@ -66,7 +64,7 @@ try
     iiwa.realTime_startVelControlJoints();
    
 
-        tic;                                                                % 计时器
+        tic;                                                                
 
         while(t <= runTime)
 
@@ -75,13 +73,13 @@ try
             [~, J] = iiwa.gen_DirectKinematics(Joint);
             Jvel = J(1:3,:);
 
-            AccError(3) = M_cartesian(3,3) * (Delta_F_Last(3) - B_cartesianLast(3,3) * VelErrorLast(3));  % 导纳控制求出的加速度
-            VelError(3) = VelErrorLast(3) + AccError(3) * Delta_T;          % 求出的速度
+            AccError(3) = M_cartesian(3,3) * (Delta_F_Last(3) - B_cartesianLast(3,3) * VelErrorLast(3));  
+            VelError(3) = VelErrorLast(3) + AccError(3) * Delta_T;          
             
             VelError_Base = RotaM * [0; 0; VelError(3)];
          
 
-            % EEFVel = EEFTarget - VelError_Base;                                     % X轴方向目标位置不变
+            % EEFVel = EEFTarget - VelError_Base;                                     
             EEFVel = RotaM * [0; 0; VelError(3)];
             ALL_EEFadmitCartVel = [ALL_EEFadmitCartVel EEFVel];
 
@@ -97,19 +95,13 @@ try
             CurrentJoint = iiwa.sendJointsVelocitiesGetActualJpos(num2cell(JonitVel));
 
             eef_force = ATISensor();
-            ALL_EEFForce = [ALL_EEFForce eef_force];                           % 记录实时末端力变化
+            ALL_EEFForce = [ALL_EEFForce eef_force];                           
 
-            Delta_F = eef_force - targetForce;                                 % 计算实时末端力
+            Delta_F = eef_force - targetForce;                                 
 
             t = toc;
 
-            %Delta_T = t - t0;
-            
-            % Loss Function
 
-            %D_Delta_F = (Delta_F - Delta_F_Last) / Delta_T;
-
-            %LossF = Delta_F' * Q * Delta_F + Delta_F_Last' * P * Delta_F_Last;
             LossF = Delta_F' * Q * Delta_F - Delta_F_Last' * Q * Delta_F_Last;
 
             B_cartesian = B_cartesianLast - K_H' * LossF *inv(B_cartesianLast); 
@@ -117,7 +109,7 @@ try
             B_cartesianLast = B_cartesian; 
             
             JointLast = Joint; 
-            Joint = cell2mat(CurrentJoint);                                    % 将当前关节角度赋值给下一循环
+            Joint = cell2mat(CurrentJoint);                                    
             ALL_Joint = [ALL_Joint Joint'];
             ALL_JointVel = [ALL_JointVel JonitVel];
             ALL_LossF = [ALL_LossF LossF];
@@ -127,7 +119,7 @@ try
             ALL_B = [ALL_B B_flattened];
 
 
-            VelErrorLast = VelError;                                           % 更新速度误差
+            VelErrorLast = VelError;                                           
             Delta_F_Last = Delta_F;
 
             
@@ -140,7 +132,7 @@ try
 
         end
 
-    iiwa.realTime_stopVelControlJoints();                                    % 停止伺服控制
+    iiwa.realTime_stopVelControlJoints();                                    
 
 catch exception
     disp(['Error: ', getReport(exception)]);
@@ -155,17 +147,17 @@ rmpath(genpath(iiwapath));
 figure(1)
 subplot(3,1,1)
 plot(ALL_TimeInt(:), ALL_EEFForce(1,:),'b','Linewidth',2);
-title('末端x方向受力','Fontsize',10);
+title('x','Fontsize',10);
 grid on
 
 subplot(3,1,2)
 plot(ALL_TimeInt(:), ALL_EEFForce(2,:),'g','Linewidth',2);
-title('末端y方向受力','Fontsize',10);
+title('y','Fontsize',10);
 grid on
 
 subplot(3,1,3)
 plot(ALL_TimeInt(:), ALL_EEFForce(3,:),'r','Linewidth',2);
-title('末端z方向受力','Fontsize',10);
+title('z','Fontsize',10);
 grid on
 
 
