@@ -16,3 +16,12 @@ Iterative enhanced variable admittance control and null-space optimization
   This is the fixed-parameters admittance control, and uses the bulit-in joint torque sensor of the KUKA.
 
 
+Thank you for using this code! If this project helps your research or work, please consider citing the following paper:
+
+> **X. Zhu, Y. Jiang, R. He, C. Li, and X. Duan**,  
+> "Development and Validation of a Robot-Assisted Retraction System for Orthopedic Surgery,"  
+> *IEEE Transactions on Medical Robotics and Bionics*,  
+> doi: [10.1109/TMRB.2025.3550648](https://doi.org/10.1109/TMRB.2025.3550648).
+
+
+
